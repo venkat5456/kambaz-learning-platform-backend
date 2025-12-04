@@ -17,11 +17,16 @@ const ModulesRoutes = require("./Kambaz/Modules/routes.js");
 const AssignmentsRoutes = require("./Kambaz/Assignments/routes.js");
 const EnrollmentsRoutes = require("./Kambaz/Enrollments/routes.js");
 
+/* -----------------------------
+   ⚠️ MongoDB Connection Setup
+ ------------------------------*/
+
+// Use MongoDB connection from env
 const CONNECTION_STRING = process.env.MONGO_URI;
 
 if (!CONNECTION_STRING) {
-  console.error("❌ ERROR: MONGO_URI is not set in Render environment variables");
-  process.exit(1);
+  console.error("❌ ERROR: MONGO_URI is not set in environment variables");
+  process.exit(1);  // Stop server if DB is missing
 }
 
 mongoose
@@ -29,13 +34,16 @@ mongoose
   .then(() => console.log("MongoDB Connected 🚀"))
   .catch((err) => console.log("MongoDB Connection Error ❌", err));
 
+/* -----------------------------
+        Express App Setup
+ ------------------------------*/
 
 const app = express();
 
 // CORS configuration (Frontend: Vercel + Localhost)
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://kambaz-next-js-a6-sigma.vercel.app"
+  "https://kambaz-next-js-a6-sigma.vercel.app",
 ];
 
 app.use(
@@ -52,29 +60,42 @@ app.use(
   })
 );
 
+// Session middleware
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "kambaz",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: true,        // REQUIRED on HTTPS (Render)
+      sameSite: "none",    // REQUIRED for Vercel <-> Render communication
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
   })
 );
+
 
 // JSON body parsing
 app.use(express.json());
 
-// General API
+/* -----------------------------
+           API Routes
+ ------------------------------*/
+
 Hello(app);
 Lab5(app);
 
-// Register all Kambaz Routes
-UserRoutes(app);         // Users routes don't use `db`
+UserRoutes(app); // users don't use db
 CourseRoutes(app, db);
 ModulesRoutes(app, db);
 AssignmentsRoutes(app, db);
 EnrollmentsRoutes(app, db);
 
-// Server Start
+/* -----------------------------
+           Start Server
+ ------------------------------*/
+
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
