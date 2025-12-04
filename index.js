@@ -60,6 +60,9 @@ app.use(
   })
 );
 
+// ⭐ FIX: Handle preflight (important for PUT/DELETE on Render)
+app.options("/*", cors());
+
 /* -----------------------------
         Sessions 
  ------------------------------*/
@@ -71,8 +74,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,        
-      sameSite: "none",    
+      secure: true,
+      sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
