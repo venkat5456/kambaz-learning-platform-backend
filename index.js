@@ -60,9 +60,6 @@ app.use(
   })
 );
 
-// Preflight support for all routes
-app.options("*", cors());
-
 /* -----------------------------
         Sessions 
  ------------------------------*/
@@ -74,8 +71,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,        // REQUIRED on Render (HTTPS)
-      sameSite: "none",    // REQUIRED for cross-domain cookies
+      secure: true,        
+      sameSite: "none",    
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
