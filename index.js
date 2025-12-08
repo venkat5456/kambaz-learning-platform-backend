@@ -16,17 +16,14 @@ const CourseRoutes = require("./Kambaz/Courses/routes.js");
 const ModulesRoutes = require("./Kambaz/Modules/routes.js");
 const AssignmentsRoutes = require("./Kambaz/Assignments/routes.js");
 const EnrollmentsRoutes = require("./Kambaz/Enrollments/routes.js");
+const QuizzesRoutes = require("./Kambaz/Quizzes/routes.js");
+const QuestionsRoutes = require("./Kambaz/Questions/routes.js");
+const QuizAttemptsRoutes = require("./Kambaz/QuizAttempts/routes.js");
 
 /* -----------------------------
    MongoDB Connection
  ------------------------------*/
-
 const CONNECTION_STRING = process.env.MONGO_URI;
-
-if (!CONNECTION_STRING) {
-  console.error("❌ ERROR: MONGO_URI is not set");
-  process.exit(1);
-}
 
 mongoose
   .connect(CONNECTION_STRING)
@@ -36,16 +33,12 @@ mongoose
 /* -----------------------------
         Express App Setup
  ------------------------------*/
-
 const app = express();
-
-// ⭐ REQUIRED FOR RENDER — enables secure cookies
 app.set("trust proxy", 1);
 
 /* -----------------------------
-        CORS (FULL FIX)
+        CORS
  ------------------------------*/
-
 const allowedOrigins = [
   "http://localhost:3000",
   "https://kambaz-next-js-a6-sigma.vercel.app",
@@ -53,19 +46,23 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: "http://localhost:3000",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["set-cookie"],
   })
 );
 
 
 
+/* -----------------------------
+        JSON Body Parsing
+ ------------------------------*/
+app.use(express.json());
 
 /* -----------------------------
-        Sessions 
+        Session Handling  🔥 MUST COME BEFORE ROUTES
  ------------------------------*/
+const isProduction = process.env.NODE_ENV === "production";
 
 app.use(
   session({
@@ -74,36 +71,47 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
 
 /* -----------------------------
-        JSON Body Parsing
+   Debug & Cache Fix (AFTER session)
  ------------------------------*/
+app.get("/debug/session", (req, res) => {
+  res.json({
+    session: req.session,
+    currentUser: req.session?.currentUser || null,
+  });
+});
 
-app.use(express.json());
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 /* -----------------------------
            API Routes
  ------------------------------*/
-
 Hello(app);
 Lab5(app);
+
 UserRoutes(app);
 CourseRoutes(app, db);
 ModulesRoutes(app, db);
 AssignmentsRoutes(app, db);
 EnrollmentsRoutes(app, db);
+QuizzesRoutes(app, db);
+QuestionsRoutes(app, db);
+QuizAttemptsRoutes(app);
 
 /* -----------------------------
            Start Server
  ------------------------------*/
-
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });

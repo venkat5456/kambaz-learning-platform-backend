@@ -2,6 +2,7 @@ const PathParameters = require("./PathParameters.js");
 const QueryParameters = require("./QueryParameters.js");
 const WorkingWithObjects = require("./WorkingWithObjects.js");
 const WorkingWithArrays = require("./WorkingWithArrays.js");
+const QuizAttemptsRoutes = require("../Kambaz/QuizAttempts/routes.js");
 
 // NEW
 const WorkingWithObjectsAsync = require("./WorkingWithObjectsAsynchronously.js");
@@ -23,5 +24,7 @@ module.exports = function (app) {
   // NEW — ASYNC PARTS
   WorkingWithObjectsAsync(app);
   WorkingWithArraysAsync(app);
+  QuizAttemptsRoutes(app);
+
 };
 
