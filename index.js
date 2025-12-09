@@ -37,7 +37,7 @@ const app = express();
 app.set("trust proxy", 1);
 
 /* -----------------------------
-        CORS
+        CORS  (FIXED ONLY THIS PART)
  ------------------------------*/
 const allowedOrigins = [
   "http://localhost:3000",
@@ -47,13 +47,18 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow non-browser tools
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS blocked: " + origin));
+      }
+    },
     credentials: true,
     exposedHeaders: ["set-cookie"],
   })
 );
-
-
 
 /* -----------------------------
         JSON Body Parsing
@@ -61,7 +66,7 @@ app.use(
 app.use(express.json());
 
 /* -----------------------------
-        Session Handling  🔥 MUST COME BEFORE ROUTES
+        Session Handling
  ------------------------------*/
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -80,7 +85,7 @@ app.use(
 );
 
 /* -----------------------------
-   Debug & Cache Fix (AFTER session)
+   Debug & Cache Fix
  ------------------------------*/
 app.get("/debug/session", (req, res) => {
   res.json({
