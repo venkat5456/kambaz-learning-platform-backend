@@ -42,6 +42,7 @@ app.set("trust proxy", 1);
 const allowedOrigins = [
   "http://localhost:3000",
   "https://kambaz-next-js-a6-sigma.vercel.app",
+  "https://kambaz-next-js-oxru.vercel.app"
 ];
 
 app.use(
