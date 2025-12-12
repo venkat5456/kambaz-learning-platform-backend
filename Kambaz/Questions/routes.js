@@ -17,11 +17,14 @@ module.exports = (app) => {
     }
   });
 
-  // CREATE a question
+  // CREATE a question ✅ FIXED
   app.post("/api/quizzes/:qid/questions", async (req, res) => {
     try {
-      const question = await createQuestion(req.params.qid, req.body);
-      res.json(question);
+      const created = await createQuestion(
+        req.params.qid, // ✅ quizId
+        req.body        // ✅ questionData
+      );
+      res.json(created);
     } catch (err) {
       console.error("🔥 CREATE QUESTION ERROR:", err);
       res.status(500).send("Error creating question");
@@ -31,7 +34,10 @@ module.exports = (app) => {
   // UPDATE question
   app.put("/api/questions/:questionId", async (req, res) => {
     try {
-      const updated = await updateQuestion(req.params.questionId, req.body);
+      const updated = await updateQuestion(
+        req.params.questionId,
+        req.body
+      );
       res.json(updated);
     } catch (err) {
       console.error(err);

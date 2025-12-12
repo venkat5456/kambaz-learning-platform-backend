@@ -1,4 +1,4 @@
-// Kambaz/Users/routes.js
+
 const UsersDao = require("./dao.js");
 
 module.exports = function UserRoutes(app) {

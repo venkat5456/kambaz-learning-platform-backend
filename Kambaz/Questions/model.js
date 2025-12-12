@@ -12,6 +12,8 @@ const QuestionSchema = new mongoose.Schema(
       default: "MCQ",
     },
 
+    body: { type: String },
+
     points: { type: Number, default: 0 },
 
     // For MCQ
